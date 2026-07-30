@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SBJ Technical Dispatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+/* ============================================================
+   SBJ Technical Dispatch
+   Palette is drawn from the workbook header navy and the amber of
+   a live inverter LED. High contrast on paper white, because this
+   gets read on a phone on a roof in direct sun.
+   ============================================================ */
+:root{
+  --paper:#F6F7F9;
+  --surface:#FFFFFF;
+  --ink:#0C1B2A;
+  --ink-2:#41576E;
+  --ink-3:#7C8EA1;
+  --rule:#DCE2E9;
+  --navy:#1F3864;
+  --navy-ink:#152744;
+  --amber:#E29200;
+  --amber-wash:#FFF6E3;
+  --red:#B4232A;
+  --red-wash:#FDECEC;
+  --green:#17734A;
+  --green-wash:#E8F5EE;
+  --blue:#1F5FA8;
+  --blue-wash:#EAF2FC;
+
+  --pri-low:#7C8EA1;
+  --pri-normal:#1F5FA8;
+  --pri-high:#E29200;
+  --pri-emergency:#B4232A;
+
+  --r:6px;
+  --shadow:0 1px 2px rgba(12,27,42,.06), 0 8px 24px rgba(12,27,42,.06);
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --display:'Archivo',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--body);
+  background:var(--paper);
+  color:var(--ink);
+  font-size:14px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- shell ---------- */
+.top{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:16px;
+  padding:0 20px;height:56px;
+  background:var(--navy);color:#fff;
+}
+.brand{font-family:var(--display);font-weight:700;letter-spacing:-.01em;font-size:16px}
+.brand span{color:var(--amber)}
+.brand small{
+  display:block;font-family:var(--body);font-weight:500;font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:#9FB3D1;margin-top:-2px;
+}
+.top-spacer{flex:1}
+.who{display:flex;align-items:center;gap:10px;font-size:13px}
+.who b{font-weight:600}
+.role{
+  font-family:var(--body);font-size:10px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 7px;border-radius:3px;
+  background:rgba(255,255,255,.14);
+}
+.role.admin{background:var(--amber);color:var(--navy-ink)}
+.ghost{
+  background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;
+  padding:5px 10px;border-radius:var(--r);font-size:12px;
+}
+.ghost:hover{background:rgba(255,255,255,.1)}
+
+.layout{display:grid;grid-template-columns:212px 1fr;min-height:calc(100vh - 56px)}
+.side{
+  border-right:1px solid var(--rule);background:var(--surface);
+  padding:16px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;
+}
+.nav-label{
+  font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);padding:0 20px;margin:14px 0 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:9px 20px;border:0;background:none;text-align:left;
+  font-weight:500;color:var(--ink-2);border-left:3px solid transparent;
+}
+.nav-item:hover{background:var(--paper);color:var(--ink)}
+.nav-item[aria-current="true"]{
+  color:var(--navy);background:var(--blue-wash);
+  border-left-color:var(--navy);font-weight:600;
+}
+.nav-count{
+  margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:600;
+  color:var(--ink-3);
+}
+.nav-count.hot{color:var(--red)}
+.main{padding:22px 26px 80px;max-width:1180px}
+
+/* ---------- page head ---------- */
+.head{display:flex;align-items:flex-end;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+h1{
+  font-family:var(--display);font-size:24px;font-weight:700;
+  letter-spacing:-.02em;margin:0;
+}
+.sub{color:var(--ink-3);font-size:13px;margin:2px 0 0}
+.head-actions{margin-left:auto;display:flex;gap:8px}
+.btn{
+  border:1px solid var(--rule);background:var(--surface);color:var(--ink);
+  padding:8px 14px;border-radius:var(--r);font-weight:600;font-size:13px;
+}
+.btn:hover{border-color:var(--ink-3)}
+.btn-primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--navy-ink)}
+.btn-amber{background:var(--amber);border-color:var(--amber);color:var(--navy-ink)}
+.btn-danger{background:var(--surface);border-color:var(--red);color:var(--red)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{
+  border:1px solid var(--rule);background:var(--surface);
+  padding:5px 12px;border-radius:100px;font-size:12px;font-weight:500;color:var(--ink-2);
+}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.search{
+  border:1px solid var(--rule);background:var(--surface);border-radius:var(--r);
+  padding:7px 11px;min-width:200px;
+}
+
+/* ---------- job card: the priority spine is the signature ---------- */
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{
+  display:grid;grid-template-columns:4px 1fr auto;
+  background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+  overflow:hidden;box-shadow:0 1px 1px rgba(12,27,42,.03);
+  transition:border-color .12s, box-shadow .12s;
+}
+.card:hover{border-color:var(--ink-3);box-shadow:var(--shadow)}
+.spine{background:var(--pri-normal)}
+.spine.Low{background:var(--pri-low)}
+.spine.Normal{background:var(--pri-normal)}
+.spine.High{background:var(--pri-high)}
+.spine.Emergency{
+  background:repeating-linear-gradient(135deg,var(--pri-emergency) 0 6px,#8E1A20 6px 12px);
+}
+.card-body{padding:12px 14px;min-width:0}
+.card-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:3px}
+.rid{
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  color:var(--navy);background:var(--blue-wash);
+  padding:2px 6px;border-radius:3px;letter-spacing:-.02em;
+}
+.card-title{font-weight:600;font-size:15px;letter-spacing:-.01em}
+.card-meta{color:var(--ink-2);font-size:12.5px;display:flex;gap:14px;flex-wrap:wrap}
+.card-meta b{font-weight:600;color:var(--ink)}
+.card-side{
+  padding:12px 14px;display:flex;flex-direction:column;align-items:flex-end;
+  gap:7px;justify-content:center;border-left:1px solid var(--rule);
+}
+.tag{
+  font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 7px;border-radius:3px;white-space:nowrap;
+}
+.tag.wait{background:var(--amber-wash);color:#8A5A00}
+.tag.live{background:var(--blue-wash);color:var(--blue)}
+.tag.done{background:var(--green-wash);color:var(--green)}
+.tag.dead{background:var(--paper);color:var(--ink-3)}
+.tag.open{background:var(--red-wash);color:var(--red)}
+.due{font-family:var(--mono);font-size:12px;font-weight:600}
+.due.over{color:var(--red)}
+.due.today{color:var(--amber)}
+
+.empty{
+  border:1px dashed var(--rule);border-radius:var(--r);background:var(--surface);
+  padding:38px 20px;text-align:center;color:var(--ink-2);
+}
+.empty b{display:block;font-family:var(--display);font-size:16px;color:var(--ink);margin-bottom:4px}
+
+/* ---------- board ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:13px 15px}
+.stat .k{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.03em;margin-top:2px}
+.stat.alert .v{color:var(--red)}
+.stat.warn .v{color:var(--amber)}
+.section-title{
+  font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+  margin:26px 0 10px;padding-bottom:7px;border-bottom:1px solid var(--rule);
+}
+
+/* ---------- table (resource queue, technicians) ---------- */
+table{width:100%;border-collapse:collapse;background:var(--surface);
+  border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
+th{
+  text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+  padding:9px 12px;background:var(--paper);border-bottom:1px solid var(--rule);
+}
+td{padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.mono,th.mono{font-family:var(--mono);font-size:12px}
+.stock-bar{height:5px;background:var(--rule);border-radius:3px;overflow:hidden;width:78px}
+.stock-bar i{display:block;height:100%;background:var(--green)}
+.stock-bar i.tight{background:var(--amber)}
+.stock-bar i.out{background:var(--red)}
+
+/* ---------- slide-over ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(12,27,42,.42);z-index:50;
+  opacity:0;pointer-events:none;transition:opacity .16s;
+}
+.scrim.on{opacity:1;pointer-events:auto}
+.panel{
+  position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);z-index:51;
+  background:var(--surface);border-left:1px solid var(--rule);
+  transform:translateX(100%);transition:transform .2s ease;
+  display:flex;flex-direction:column;
+}
+.panel.on{transform:none}
+.panel-head{
+  padding:16px 20px;border-bottom:1px solid var(--rule);
+  display:flex;align-items:flex-start;gap:12px;
+}
+.panel-head h2{font-family:var(--display);font-size:18px;margin:0 0 2px;letter-spacing:-.01em}
+.panel-body{padding:18px 20px 40px;overflow-y:auto;flex:1}
+.x{border:0;background:none;font-size:22px;line-height:1;color:var(--ink-3);padding:0 4px;margin-left:auto}
+
+.kv{display:grid;grid-template-columns:132px 1fr;gap:7px 14px;margin-bottom:20px;font-size:13px}
+.kv dt{color:var(--ink-3);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding-top:2px}
+.kv dd{margin:0;font-weight:500}
+.notes{
+  background:var(--paper);border:1px solid var(--rule);border-radius:var(--r);
+  padding:11px 13px;font-size:12.5px;white-space:pre-wrap;
+  max-height:190px;overflow-y:auto;font-family:var(--mono);line-height:1.55;
+}
+.field{margin-bottom:13px}
+.field label{
+  display:block;font-size:11px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:4px;
+}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid var(--rule);border-radius:var(--r);
+  padding:8px 10px;background:var(--surface);
+}
+.field textarea{min-height:74px;resize:vertical}
+.field.req label:after{content:' *';color:var(--red)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tick{display:flex;align-items:center;gap:8px;padding:5px 0;font-weight:500}
+.tick input{width:auto}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.divider{height:1px;background:var(--rule);margin:20px 0}
+
+/* ---------- sign-in ---------- */
+.gate{
+  position:fixed;inset:0;z-index:80;background:var(--navy);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.gate-card{
+  background:var(--surface);border-radius:10px;padding:34px 32px;
+  max-width:400px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);
+}
+.gate-card h1{font-size:21px;margin-bottom:5px}
+.gate-card p{color:var(--ink-2);margin:0 0 22px;font-size:13.5px}
+.gate-err{
+  background:var(--red-wash);border:1px solid #F0C4C4;color:#7E1B20;
+  border-radius:var(--r);padding:10px 12px;font-size:12.5px;margin-bottom:16px;
+}
+.hint{color:var(--ink-3);font-size:11.5px;margin-top:18px;line-height:1.5}
+
+/* ---------- toast ---------- */
+.toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:90;
+  display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{
+  background:var(--ink);color:#fff;padding:10px 16px;border-radius:var(--r);
+  font-size:13px;font-weight:500;box-shadow:var(--shadow);max-width:min(90vw,460px);
+}
+.toast.bad{background:var(--red)}
+.toast.good{background:var(--green)}
+
+.spin{
+  width:16px;height:16px;border:2px solid var(--rule);border-top-color:var(--navy);
+  border-radius:50%;animation:sp .7s linear infinite;display:inline-block;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading{padding:44px;text-align:center;color:var(--ink-3)}
+
+/* ---------- mobile ---------- */
+.tabbar{display:none}
+@media (max-width:820px){
+  .layout{grid-template-columns:1fr}
+  .side{display:none}
+  .main{padding:16px 14px 84px}
+  .top{padding:0 14px;gap:10px}
+  .who b{display:none}
+  h1{font-size:20px}
+  .card{grid-template-columns:4px 1fr}
+  .card-side{
+    border-left:0;border-top:1px solid var(--rule);
+    grid-column:2;flex-direction:row;align-items:center;justify-content:flex-start;
+    padding:9px 14px;
+  }
+  .kv{grid-template-columns:1fr;gap:2px 0}
+  .kv dd{margin-bottom:9px}
+  .row2{grid-template-columns:1fr}
+  .tabbar{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:40;
+    background:var(--surface);border-top:1px solid var(--rule);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tabbar button{
+    flex:1;border:0;background:none;padding:9px 4px 11px;
+    font-size:10.5px;font-weight:600;color:var(--ink-3);
+    border-top:2px solid transparent;display:flex;flex-direction:column;
+    align-items:center;gap:3px;
+  }
+  .tabbar button[aria-current="true"]{color:var(--navy);border-top-color:var(--amber)}
+  .tabbar .ico{font-size:16px;line-height:1}
+  .panel{width:100%}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+}
+</style>
+</head>
+<body>
+
+<!-- =================== sign-in gate =================== -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h1 style="font-family:var(--display);letter-spacing:-.02em;margin:0 0 5px">
+      Technical Dispatch
+    </h1>
+    <p>Sign in with your Solar Buzz Google account.</p>
+    <div class="gate-err" id="gateErr" hidden></div>
+    <div id="gsiBtn"></div>
+    <p class="hint" id="gateHint">
+      Access is limited to accounts listed in the Technicians sheet.
+      If sign-in is refused, ask an administrator to add you.
+    </p>
+  </div>
+</div>
+
+<!-- =================== app shell =================== -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="brand">Solar<span>Buzz</span><small>Technical Dispatch</small></div>
+    <div class="top-spacer"></div>
+    <div class="who">
+      <b id="whoName"></b>
+      <span class="role" id="whoRole"></span>
+      <button class="ghost" id="btnRefresh" title="Reload from the sheet">Refresh</button>
+      <button class="ghost" id="btnOut">Sign out</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="side" id="side"></nav>
+    <main class="main" id="view"><div class="loading"><span class="spin"></span></div></main>
+  </div>
+
+  <nav class="tabbar" id="tabbar"></nav>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+  <div class="panel-head">
+    <div>
+      <h2 id="panelTitle">Detail</h2>
+      <div class="sub" id="panelSub"></div>
+    </div>
+    <button class="x" id="panelX" aria-label="Close">&times;</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</aside>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ==================================================================
+   CONFIGURATION - replace these two values after deploying.
+   API_URL  : the Apps Script web app /exec URL
+   CLIENT_ID: the OAuth 2.0 Web client ID from Google Cloud
+   ================================================================== */
+const CONFIG = {
+  API_URL:   'https://script.google.com/macros/s/AKfycbxrNOBtPSGTV3wu_9xnkmnPT-Oc2OzudxiRwixmB7g0VQ0ncVUTG4PCzSFYAr4V4u1WWA/exec',
+  CLIENT_ID: '313373930427-4p9lf4vodt7r1vraqgikgn2qshdr1jhs.apps.googleusercontent.com'
+};
+
+/* ---------- state ---------- */
+const S = {
+  token: null,
+  tokenExp: 0,
+  boot: null,
+  page: 'board',
+  scope: 'mine',
+  filter: 'active',
+  query: '',
+  records: {},
+  requests: [],
+  busy: false
+};
+
+const CATS = ['maintenance','troubleshooting','remedial','siteVisit'];
+const ICONS = {
+  board:'\u25A6', maintenance:'\u2699', troubleshooting:'\u26A1',
+  remedial:'\u2692', siteVisit:'\u25CE', resources:'\u25A4', team:'\u25CB'
+};
+
+/* ---------- utilities ---------- */
+const $  = (s,r) => (r||document).querySelector(s);
+const el = (t,c,txt) => { const n=document.createElement(t); if(c)n.className=c;
+  if(txt!==undefined)n.textContent=txt; return n; };
+const esc = s => String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const clean = v => String(v==null?'':v).replace(/^'/,'').trim();
+
+function today(){
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+}
+function dayDiff(dateText){
+  const d = clean(dateText).slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+  return Math.round((new Date(d+'T00:00:00') - new Date(today()+'T00:00:00')) / 86400000);
+}
+function prettyDate(dateText){
+  const d = clean(dateText).slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return clean(dateText) || '\u2014';
+  const [y,m,dd] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return dd.replace(/^0/,'') + ' ' + months[+m-1] + ' ' + y;
+}
+
+function toast(msg, kind){
+  const t = el('div','toast'+(kind?' '+kind:''), msg);
+  $('#toasts').appendChild(t);
+  setTimeout(()=>t.remove(), kind==='bad' ? 6000 : 3200);
+}
+
+/* ---------- API ---------- */
+async function api(action, payload){
+  if(CONFIG.API_URL.indexOf('PASTE_') === 0){
+    throw new Error('API_URL is not configured in index.html.');
+  }
+  const res = await fetch(CONFIG.API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ action, idToken: S.token, payload: payload||{} })
+  });
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); }
+  catch(e){ throw new Error('The server returned an unreadable response. Check the deployment access is set to Anyone.'); }
+  if(!json.ok){
+    if(String(json.error||'').indexOf('AUTH:') === 0){ signOut(json.error); }
+    throw new Error(json.error || 'Request failed.');
+  }
+  return json.data;
+}
+
+/* ---------- authentication ---------- */
+function decodeJwt(t){
+  try {
+    const p = t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(decodeURIComponent(atob(p).split('').map(
+      c => '%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+  } catch(e){ return {}; }
+}
+
+window.onGsiCredential = async function(resp){
+  S.token = resp.credential;
+  const claims = decodeJwt(resp.credential);
+  S.tokenExp = (claims.exp||0) * 1000;
+  scheduleReauth();
+  try {
+    await boot();
+  } catch(err){
+    gateError(err.message);
+  }
+};
+
+/* ID tokens live an hour. Re-prompt quietly five minutes out so a
+   technician mid-job is not dumped back to the sign-in screen. */
+function scheduleReauth(){
+  const ms = S.tokenExp - Date.now() - 5*60*1000;
+  if(ms > 0) setTimeout(()=>{ try{ google.accounts.id.prompt(); }catch(e){} }, ms);
+}
+
+function initGsi(){
+  if(!window.google || !google.accounts){ setTimeout(initGsi, 200); return; }
+  if(CONFIG.CLIENT_ID.indexOf('PASTE_') === 0){
+    gateError('CLIENT_ID is not configured in index.html.');
+    $('#gateHint').textContent =
+      'Set CONFIG.API_URL and CONFIG.CLIENT_ID at the top of the page script, then reload.';
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: CONFIG.CLIENT_ID,
+    callback: window.onGsiCredential,
+    auto_select: true,
+    cancel_on_tap_outside: false
+  });
+  google.accounts.id.renderButton($('#gsiBtn'), {
+    theme:'filled_blue', size:'large', width:336, text:'signin_with'
+  });
+  google.accounts.id.prompt();
+}
+
+function gateError(msg){
+  const box = $('#gateErr');
+  box.textContent = msg;
+  box.hidden = false;
+  $('#gate').hidden = false;
+  $('#app').hidden = true;
+}
+
+function signOut(msg){
+  S.token = null; S.boot = null;
+  try { google.accounts.id.disableAutoSelect(); } catch(e){}
+  $('#app').hidden = true;
+  $('#gate').hidden = false;
+  if(msg) gateError(msg.replace(/^AUTH:\s*/,''));
+}
+
+/* ---------- boot ---------- */
+async function boot(){
+  S.boot = await api('bootstrap');
+  $('#gate').hidden = true;
+  $('#app').hidden = false;
+  $('#whoName').textContent = S.boot.user.name;
+  const r = $('#whoRole');
+  r.textContent = S.boot.user.role;
+  r.className = 'role' + (S.boot.user.isAdmin ? ' admin' : '');
+  S.scope = S.boot.user.isAdmin ? 'all' : 'mine';
+  buildNav();
+  await loadAll();
+  render();
+}
+
+function pages(){
+  const p = [{key:'board', label:'Dispatch board'}];
+  CATS.forEach(k => p.push({ key:k, label:S.boot.categories[k].label }));
+  p.push({key:'resources', label: S.boot.user.isAdmin ? 'Resource requests' : 'My requests'});
+  if(S.boot.user.isAdmin) p.push({key:'team', label:'Technicians'});
+  return p;
+}
+
+function buildNav(){
+  const side = $('#side'); side.innerHTML = '';
+  const bar  = $('#tabbar'); bar.innerHTML = '';
+
+  const groups = [
+    { label:'Overview', keys:['board'] },
+    { label:'Work categories', keys:CATS },
+    { label:'Admin', keys: S.boot.user.isAdmin ? ['resources','team'] : ['resources'] }
+  ];
+
+  groups.forEach(g => {
+    side.appendChild(el('div','nav-label', g.label));
+    g.keys.forEach(k => {
+      const label = pages().find(p=>p.key===k).label;
+      const b = el('button','nav-item');
+      b.dataset.page = k;
+      b.appendChild(el('span','', label));
+      const c = el('span','nav-count'); c.id = 'count-'+k;
+      b.appendChild(c);
+      b.onclick = ()=>go(k);
+      side.appendChild(b);
+    });
+  });
+
+  // Mobile gets the four things a technician actually taps.
+  const mob = ['board','maintenance','troubleshooting','resources'];
+  mob.forEach(k => {
+    const b = el('button');
+    b.dataset.page = k;
+    const i = el('span','ico', ICONS[k]); b.appendChild(i);
+    b.appendChild(el('span','', pages().find(p=>p.key===k).label.split(' ')[0]));
+    b.onclick = ()=>go(k);
+    bar.appendChild(b);
+  });
+  markNav();
+}
+
+function markNav(){
+  document.querySelectorAll('[data-page]').forEach(b => {
+    b.setAttribute('aria-current', b.dataset.page===S.page ? 'true' : 'false');
+  });
+}
+
+function go(page){
+  S.page = page;
+  S.filter = 'active';
+  S.query = '';
+  markNav();
+  render();
+}
+
+/* ---------- data ---------- */
+async function loadAll(){
+  const scope = S.boot.user.isAdmin ? 'all' : 'mine';
+  const jobs = CATS.map(k => api('listRecords',{category:k, scope:scope})
+    .then(d => { S.records[k] = d.records; })
+    .catch(e => { S.records[k] = []; toast(S.boot.categories[k].label+': '+e.message,'bad'); }));
+  jobs.push(api('listResourceRequests',{})
+    .then(d => { S.requests = d.requests; })
+    .catch(()=>{ S.requests = []; }));
+  await Promise.all(jobs);
+
+  // Technicians also need visibility of the unclaimed pool.
+  if(!S.boot.user.isAdmin){
+    S.open = {};
+    await Promise.all(CATS.map(k => api('listRecords',{category:k, scope:'open'})
+      .then(d => { S.open[k] = d.records; })
+      .catch(()=>{ S.open[k] = []; })));
+  }
+  updateCounts();
+}
+
+function openPool(k){ return (S.open && S.open[k]) || []; }
+
+function isActive(k, r){
+  return S.boot.categories[k].openStatuses.indexOf(clean(r.Status)) !== -1;
+}
+
+function updateCounts(){
+  CATS.forEach(k => {
+    const mine = (S.records[k]||[]).filter(r=>isActive(k,r)).length;
+    const pool = openPool(k).length;
+    const c = $('#count-'+k);
+    if(c){ c.textContent = mine + (pool ? '+'+pool : ''); c.className = 'nav-count'; }
+  });
+  const pending = S.requests.filter(r=>clean(r.Status)==='Requested').length;
+  const rc = $('#count-resources');
+  if(rc){ rc.textContent = pending || ''; rc.className = 'nav-count' + (pending?' hot':''); }
+  const overdue = allRecords().filter(x => {
+    const d = dayDiff(x.r['Date Scheduled']);
+    return isActive(x.k, x.r) && d !== null && d < 0;
+  }).length;
+  const bc = $('#count-board');
+  if(bc){ bc.textContent = overdue || ''; bc.className = 'nav-count' + (overdue?' hot':''); }
+}
+
+function allRecords(){
+  const out = [];
+  CATS.forEach(k => (S.records[k]||[]).forEach(r => out.push({k:k, r:r})));
+  return out;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const v = $('#view');
+  v.innerHTML = '';
+  if(S.page === 'board') return renderBoard(v);
+  if(S.page === 'resources') return renderResources(v);
+  if(S.page === 'team') return renderTeam(v);
+  return renderCategory(v, S.page);
+}
+
+function pageHead(parent, title, sub, actions){
+  const h = el('div','head');
+  const box = el('div');
+  const t = el('h1','',title); box.appendChild(t);
+  if(sub) box.appendChild(el('p','sub',sub));
+  h.appendChild(box);
+  if(actions && actions.length){
+    const a = el('div','head-actions');
+    actions.forEach(b => a.appendChild(b));
+    h.appendChild(a);
+  }
+  parent.appendChild(h);
+}
+
+/* ---------- dispatch board ---------- */
+function renderBoard(v){
+  const admin = S.boot.user.isAdmin;
+  pageHead(v, admin ? 'Dispatch board' : 'My work',
+    admin ? 'Everything live across the four categories.'
+          : 'Jobs assigned to you, and what is unclaimed.');
+
+  const active = allRecords().filter(x=>isActive(x.k,x.r));
+  const overdue = active.filter(x => { const d=dayDiff(x.r['Date Scheduled']); return d!==null && d<0; });
+  const todayJobs = active.filter(x => dayDiff(x.r['Date Scheduled']) === 0);
+  const week = active.filter(x => { const d=dayDiff(x.r['Date Scheduled']); return d!==null && d>0 && d<=7; });
+  const unscheduled = active.filter(x => !clean(x.r['Date Scheduled']));
+  const offered = active.filter(x => clean(x.r['Assignment State'])==='Offered'
+    && (admin || x.r['Technicians Assigned']));
+  const pendingReq = S.requests.filter(r=>clean(r.Status)==='Requested');
+
+  const stats = el('div','stats');
+  [
+    ['Overdue', overdue.length, overdue.length?'alert':''],
+    ['Today', todayJobs.length, todayJobs.length?'warn':''],
+    ['Next 7 days', week.length, ''],
+    ['Unscheduled', unscheduled.length, unscheduled.length?'warn':''],
+    [admin?'Awaiting acceptance':'Offered to you', offered.length, ''],
+    [admin?'Requests to approve':'Requests pending', pendingReq.length, pendingReq.length&&admin?'warn':'']
+  ].forEach(([k,vv,cls]) => {
+    const s = el('div','stat'+(cls?' '+cls:''));
+    s.appendChild(el('div','k',k));
+    s.appendChild(el('div','v',String(vv)));
+    stats.appendChild(s);
+  });
+  v.appendChild(stats);
+
+  if(!admin){
+    const pool = CATS.reduce((n,k)=>n+openPool(k).length, 0);
+    if(pool){
+      v.appendChild(el('div','section-title','Unclaimed, available to pick up ('+pool+')'));
+      const list = el('div','cards');
+      CATS.forEach(k => openPool(k).forEach(r => list.appendChild(jobCard(k,r,true))));
+      v.appendChild(list);
+    }
+  }
+
+  const blocks = [
+    ['Overdue', overdue],
+    ['Scheduled today', todayJobs],
+    [admin?'Awaiting technician acceptance':'Offered to you, not yet accepted', offered],
+    ['Next seven days', week],
+    ['Not yet scheduled', unscheduled]
+  ];
+  let any = false;
+  blocks.forEach(([label, set]) => {
+    if(!set.length) return;
+    any = true;
+    v.appendChild(el('div','section-title', label + ' (' + set.length + ')'));
+    const list = el('div','cards');
+    sortJobs(set).forEach(x => list.appendChild(jobCard(x.k, x.r)));
+    v.appendChild(list);
+  });
+
+  if(!any){
+    const e = el('div','empty');
+    e.appendChild(el('b','','Nothing outstanding'));
+    e.appendChild(el('div','', admin
+      ? 'No live jobs across any category. Raise one from a category page.'
+      : 'You have no open jobs. Check the unclaimed pool on a category page.'));
+    v.appendChild(e);
+  }
+}
+
+function sortJobs(arr){
+  const pri = {Emergency:0, High:1, Normal:2, Low:3};
+  return arr.slice().sort((a,b) => {
+    const da = dayDiff(a.r['Date Scheduled']), db = dayDiff(b.r['Date Scheduled']);
+    const aa = da===null ? 9999 : da, bb = db===null ? 9999 : db;
+    if(aa !== bb) return aa - bb;
+    return (pri[clean(a.r.Priority)]||2) - (pri[clean(b.r.Priority)]||2);
+  });
+}
+
+/* ---------- category page ---------- */
+function renderCategory(v, key){
+  const cat = S.boot.categories[key];
+  const admin = S.boot.user.isAdmin;
+  const canCreate = admin || cat.techCanCreate;
+
+  const actions = [];
+  if(canCreate){
+    const b = el('button','btn btn-primary','Raise ' + cat.label.replace(/s$/,'').toLowerCase());
+    b.onclick = ()=>openCreate(key);
+    actions.push(b);
+  }
+  pageHead(v, cat.label,
+    admin ? 'All records. ' + cat.statuses.join(' \u2192 ')
+          : 'Your jobs, plus anything unclaimed.',
+    actions);
+
+  const chips = el('div','chips');
+  const filters = [['active','Live'],['all','All']];
+  cat.statuses.forEach(s => filters.push(['st:'+s, s]));
+  if(!admin) filters.splice(2,0,['pool','Unclaimed']);
+  filters.forEach(([k,label]) => {
+    const c = el('button','chip',label);
+    c.setAttribute('aria-pressed', S.filter===k ? 'true':'false');
+    c.onclick = ()=>{ S.filter=k; render(); };
+    chips.appendChild(c);
+  });
+  const q = el('input','search'); q.type='search';
+  q.placeholder = 'Client, location, record ID';
+  q.value = S.query;
+  q.oninput = e => { S.query = e.target.value; drawList(); };
+  chips.appendChild(q);
+  v.appendChild(chips);
+
+  const list = el('div','cards'); list.id='jobList';
+  v.appendChild(list);
+  drawList();
+
+  function drawList(){
+    const wrap = $('#jobList');
+    wrap.innerHTML = '';
+    let rows;
+    if(S.filter === 'pool'){
+      rows = openPool(key).map(r=>({k:key,r:r,pool:true}));
+    } else {
+      rows = (S.records[key]||[]).map(r=>({k:key,r:r}));
+      if(!admin) rows = rows.concat(openPool(key).map(r=>({k:key,r:r,pool:true})));
+      if(S.filter === 'active') rows = rows.filter(x=>isActive(key,x.r));
+      if(S.filter.indexOf('st:')===0){
+        const want = S.filter.slice(3);
+        rows = rows.filter(x=>clean(x.r.Status)===want);
+      }
+    }
+    const q2 = S.query.trim().toLowerCase();
+    if(q2){
+      rows = rows.filter(x => ['Record ID','Client','Location','Issue',
+        'Scope of Works','Purpose','Ticket','Technicians Assigned']
+        .some(f => String(x.r[f]||'').toLowerCase().indexOf(q2) !== -1));
+    }
+    if(!rows.length){
+      const e = el('div','empty');
+      e.appendChild(el('b','','No records match'));
+      e.appendChild(el('div','', canCreate
+        ? 'Clear the filter, or raise a new ' + cat.label.toLowerCase() + ' record.'
+        : 'Clear the filter to widen the search.'));
+      wrap.appendChild(e);
+      return;
+    }
+    sortJobs(rows).forEach(x => wrap.appendChild(jobCard(x.k, x.r, x.pool)));
+  }
+}
+
+/* ---------- job card ---------- */
+function statusClass(key, status){
+  const s = clean(status);
+  if(['Completed','Verified','Resolved','Report Submitted','Visited'].indexOf(s)!==-1) return 'done';
+  if(['Cancelled'].indexOf(s)!==-1) return 'dead';
+  if(['In Progress'].indexOf(s)!==-1) return 'live';
+  if(['Reported','Raised','Requested','Escalated'].indexOf(s)!==-1) return 'open';
+  return 'wait';
+}
+
+function jobCard(key, r, isPool){
+  const cat = S.boot.categories[key];
+  const card = el('div','card');
+  card.appendChild(el('div','spine ' + (clean(r.Priority)||'Normal')));
+
+  const body = el('div','card-body');
+  const top = el('div','card-top');
+  top.appendChild(el('span','rid', clean(r['Record ID'])));
+  const headline = clean(r.Client) || clean(r.Issue) || 'Unnamed record';
+  top.appendChild(el('span','card-title', headline));
+  if(isPool) top.appendChild(el('span','tag open','unclaimed'));
+  body.appendChild(top);
+
+  const detail = clean(r.Issue) || clean(r['Scope of Works']) || clean(r.Purpose);
+  if(detail) body.appendChild(el('div','card-meta', detail.slice(0,110)));
+
+  const meta = el('div','card-meta');
+  if(clean(r.Location)) meta.appendChild(el('span','','\u25CF ' + clean(r.Location)));
+  const techs = clean(r['Technicians Assigned']);
+  meta.appendChild(el('span','', techs ? '\u25CF ' + techs : '\u25CF unassigned'));
+  if(clean(r.Resources)) meta.appendChild(el('span','','\u25CF ' + clean(r.Resources)));
+  body.appendChild(meta);
+  card.appendChild(body);
+
+  const side = el('div','card-side');
+  side.appendChild(el('span','tag ' + statusClass(key, r.Status), clean(r.Status)));
+  const as = clean(r['Assignment State']);
+  if(as === 'Offered') side.appendChild(el('span','tag wait','offered'));
+
+  const d = dayDiff(r['Date Scheduled']);
+  const due = el('span','due');
+  if(d === null){ due.textContent = 'no date'; due.style.color = 'var(--ink-3)'; }
+  else if(d < 0){ due.className='due over'; due.textContent = Math.abs(d)+'d overdue'; }
+  else if(d === 0){ due.className='due today'; due.textContent = 'today'; }
+  else { due.textContent = prettyDate(r['Date Scheduled']); }
+  side.appendChild(due);
+  card.appendChild(side);
+
+  card.onclick = ()=>openRecord(key, clean(r['Record ID']), isPool);
+  card.tabIndex = 0;
+  card.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); card.click(); } };
+  return card;
+}
+
+/* ---------- slide-over plumbing ---------- */
+function showPanel(title, sub){
+  $('#panelTitle').textContent = title;
+  $('#panelSub').textContent = sub||'';
+  $('#panelBody').innerHTML = '<div class="loading"><span class="spin"></span></div>';
+  $('#panel').classList.add('on');
+  $('#scrim').classList.add('on');
+}
+function closePanel(){
+  $('#panel').classList.remove('on');
+  $('#scrim').classList.remove('on');
+}
+$('#panelX').onclick = closePanel;
+$('#scrim').onclick = closePanel;
+document.addEventListener('keydown', e => { if(e.key==='Escape') closePanel(); });
+
+function field(label, node, required){
+  const f = el('div','field' + (required?' req':''));
+  const l = el('label','',label);
+  const id = 'f_' + label.replace(/[^a-z0-9]/gi,'_');
+  l.setAttribute('for', id);
+  node.id = id;
+  f.appendChild(l); f.appendChild(node);
+  return f;
+}
+function input(type, value){
+  const i = el('input'); i.type = type || 'text';
+  if(value!==undefined && value!==null) i.value = clean(value);
+  return i;
+}
+function select(options, value){
+  const s = el('select');
+  options.forEach(o => {
+    const op = el('option','', typeof o==='string'?o:o.label);
+    op.value = typeof o==='string'?o:o.value;
+    if(clean(value) === op.value) op.selected = true;
+    s.appendChild(op);
+  });
+  return s;
+}
+
+/* ---------- record detail ---------- */
+async function openRecord(key, recordId, isPool){
+  const cat = S.boot.categories[key];
+  showPanel(recordId, cat.label);
+  let data;
+  try { data = await api('getRecord',{category:key, recordId:recordId}); }
+  catch(e){ $('#panelBody').innerHTML = '<div class="gate-err">'+esc(e.message)+'</div>'; return; }
+
+  const r = data.record;
+  const admin = S.boot.user.isAdmin;
+  const mine = String(r['Technicians Assigned']||'').toLowerCase()
+    .indexOf(String(S.boot.user.name).toLowerCase()) !== -1;
+  const b = $('#panelBody'); b.innerHTML = '';
+
+  /* summary */
+  const dl = el('dl','kv');
+  const show = [
+    ['Status', clean(r.Status)],
+    ['Priority', clean(r.Priority)],
+    ['Assignment', clean(r['Assignment State'])],
+    ['Client', clean(r.Client)],
+    ['Contact', clean(r['Client Contact'])],
+    ['Location', clean(r.Location)],
+    ['Technicians', clean(r['Technicians Assigned']) || 'unassigned'],
+    ['Scheduled', clean(r['Date Scheduled'])
+      ? prettyDate(r['Date Scheduled']) + (clean(r['Time Scheduled'])
+        ? ' at ' + clean(r['Time Scheduled']) : '')
+        + (clean(r['Duration (hrs)']) ? ' \u00b7 ' + clean(r['Duration (hrs)']) + ' h' : '')
+      : 'not scheduled'],
+    ['Resources', clean(r.Resources) || 'none allocated']
+  ];
+  ['Ticket','Issue','Scope of Works','Purpose','Source Record ID',
+   'Date Reported','Date Completed','Date Addressed','Date Visited','Resolution']
+    .forEach(f => { if(clean(r[f])) show.push([f, clean(r[f])]); });
+  show.forEach(([k2,v2]) => {
+    dl.appendChild(el('dt','',k2));
+    dl.appendChild(el('dd','',v2 || '\u2014'));
+  });
+  b.appendChild(dl);
+
+  if(clean(r.Attachments)){
+    const a = el('a','btn btn-sm','Open attachments folder');
+    a.href = clean(r.Attachments); a.target='_blank'; a.rel='noopener';
+    b.appendChild(a);
+    b.appendChild(el('div','divider'));
+  }
+
+  /* work log */
+  b.appendChild(el('div','section-title','Work log'));
+  b.appendChild(el('div','notes', clean(r.Notes) || 'No entries yet.'));
+  const noteBox = el('textarea'); noteBox.placeholder = 'What did you find, what did you do.';
+  b.appendChild(field('Add an entry', noteBox));
+  const noteBtn = el('button','btn btn-sm','Save entry');
+  noteBtn.onclick = ()=>act(noteBtn, 'addNote',
+    {category:key, recordId:recordId, note:noteBox.value}, 'Entry saved');
+  b.appendChild(noteBtn);
+
+  b.appendChild(el('div','divider'));
+
+  /* claim / accept */
+  if(isPool || (!mine && !admin)){
+    b.appendChild(el('div','section-title','Take this job'));
+    const claim = el('button','btn btn-amber','Assign this to me');
+    claim.onclick = ()=>act(claim,'selfAssign',{category:key, recordId:recordId},
+      'Assigned to you, calendar updated');
+    b.appendChild(claim);
+    b.appendChild(el('div','divider'));
+  } else if(mine && clean(r['Assignment State'])==='Offered'){
+    b.appendChild(el('div','section-title','This job was offered to you'));
+    const row = el('div','actions');
+    const acc = el('button','btn btn-amber','Accept');
+    acc.onclick = ()=>act(acc,'respondToAssignment',
+      {category:key, recordId:recordId, accept:true}, 'Accepted');
+    const dec = el('button','btn btn-danger','Decline');
+    dec.onclick = ()=>{
+      const why = prompt('Reason for declining (optional)') || '';
+      act(dec,'respondToAssignment',
+        {category:key, recordId:recordId, accept:false, reason:why}, 'Declined');
+    };
+    row.appendChild(acc); row.appendChild(dec);
+    b.appendChild(row);
+    b.appendChild(el('div','divider'));
+  }
+
+  /* status */
+  if(mine || admin){
+    b.appendChild(el('div','section-title','Status'));
+    const statuses = cat.statuses.filter(s => s!=='Verified' || admin);
+    const sel = select(statuses, clean(r.Status));
+    b.appendChild(field('Move to', sel));
+    const sb = el('button','btn btn-sm','Update status');
+    sb.onclick = ()=>act(sb,'setStatus',
+      {category:key, recordId:recordId, status:sel.value}, 'Status updated');
+    b.appendChild(sb);
+    b.appendChild(el('div','divider'));
+  }
+
+  /* upload */
+  if(mine || admin){
+    b.appendChild(el('div','section-title','Upload'));
+    const targets = [{value:'', label:'General attachment'}];
+    cat.headers.filter(h => /Form|Report|Site Inspection Report/.test(h))
+      .forEach(h => targets.push({value:h, label:h}));
+    const tsel = select(targets, '');
+    b.appendChild(field('File type', tsel));
+    const fi = input('file');
+    b.appendChild(field('Choose file', fi));
+    const ub = el('button','btn btn-sm','Upload to Drive');
+    ub.onclick = async ()=>{
+      const f = fi.files && fi.files[0];
+      if(!f){ toast('Choose a file first.','bad'); return; }
+      if(f.size > 24*1024*1024){ toast('File is over 24 MB. Compress it first.','bad'); return; }
+      ub.disabled = true; ub.textContent = 'Uploading\u2026';
+      try {
+        const data64 = await new Promise((res,rej)=>{
+          const fr = new FileReader();
+          fr.onload = ()=>res(String(fr.result).split(',')[1]);
+          fr.onerror = ()=>rej(new Error('Could not read the file.'));
+          fr.readAsDataURL(f);
+        });
+        await api('uploadAttachment',{
+          category:key, recordId:recordId, targetField:tsel.value,
+          file:{filename:f.name, mimeType:f.type||'application/octet-stream', data:data64}
+        });
+        toast('Uploaded','good');
+        await loadAll(); openRecord(key, recordId);
+      } catch(e){ toast(e.message,'bad'); ub.disabled=false; ub.textContent='Upload to Drive'; }
+    };
+    b.appendChild(ub);
+    b.appendChild(el('div','divider'));
+  }
+
+  /* resource requests */
+  if(mine || admin){
+    b.appendChild(el('div','section-title','Resources'));
+    if(data.resourceRequests.length){
+      const t = el('table');
+      t.innerHTML = '<tr><th>Item</th><th class="mono">Qty</th><th>Status</th></tr>';
+      data.resourceRequests.forEach(q3 => {
+        const tr = el('tr');
+        tr.innerHTML = '<td>'+esc(clean(q3['Resource Name']))+'</td>'
+          + '<td class="mono">'+esc(clean(q3['Qty Requested']))
+          + (clean(q3['Qty Approved'])!=='' ? ' \u2192 '+esc(clean(q3['Qty Approved'])) : '')
+          + '</td><td>'+esc(clean(q3.Status))+'</td>';
+        t.appendChild(tr);
+      });
+      b.appendChild(t);
+      b.appendChild(el('div','',' '));
+    }
+    const opts = S.boot.resources.map(x => ({
+      value:x.code,
+      label:x.name + ' (' + x.available + ' ' + (x.unit||'ea') + ' free)'
+    }));
+    const rsel = select(opts, '');
+    b.appendChild(field('Item', rsel));
+    const qty = input('number'); qty.min='1'; qty.value='1';
+    b.appendChild(field('Quantity', qty));
+    const rnote = input('text'); rnote.placeholder='When it is needed, or why';
+    b.appendChild(field('Note', rnote));
+    const rb = el('button','btn btn-sm','Request item');
+    rb.onclick = ()=>act(rb,'requestResource',{
+      category:key, recordId:recordId, resourceCode:rsel.value,
+      qty:Number(qty.value), notes:rnote.value
+    }, 'Request submitted for approval');
+    b.appendChild(rb);
+  }
+
+  /* admin controls */
+  if(admin){
+    b.appendChild(el('div','divider'));
+    b.appendChild(el('div','section-title','Assign and schedule'));
+
+    const box = el('div');
+    const chosen = splitNames(r['Technicians Assigned']);
+    S.boot.technicians.forEach(t => {
+      const lab = el('label','tick');
+      const cb = input('checkbox');
+      cb.value = t.name;
+      cb.checked = chosen.indexOf(t.name) !== -1;
+      cb.dataset.tech = '1';
+      lab.appendChild(cb);
+      lab.appendChild(el('span','', t.name + (t.skills ? ' \u00b7 ' + t.skills : '')));
+      box.appendChild(lab);
+    });
+    b.appendChild(field('Technicians', box));
+
+    const row = el('div','row2');
+    const dIn = input('date', clean(r['Date Scheduled']).slice(0,10));
+    const tIn = input('time', clean(r['Time Scheduled']) || '08:00');
+    row.appendChild(field('Date', dIn));
+    row.appendChild(field('Start time', tIn));
+    b.appendChild(row);
+
+    const dur = input('number', clean(r['Duration (hrs)']) || '3');
+    dur.min='0.5'; dur.step='0.5';
+    b.appendChild(field('Duration (hours)', dur));
+
+    const psel = select(S.boot.priorities, clean(r.Priority));
+    b.appendChild(field('Priority', psel));
+
+    const acts = el('div','actions');
+    const ab = el('button','btn btn-primary','Assign and lock calendar');
+    ab.onclick = async ()=>{
+      const names = Array.from(box.querySelectorAll('[data-tech]'))
+        .filter(c=>c.checked).map(c=>c.value);
+      ab.disabled = true; ab.textContent = 'Saving\u2026';
+      try {
+        await api('updateRecord',{category:key, recordId:recordId,
+          fields:{ Priority: psel.value }});
+        await api('assign',{
+          category:key, recordId:recordId, technicians:names,
+          dateScheduled: dIn.value, timeScheduled: tIn.value,
+          durationHrs: Number(dur.value)
+        });
+        toast(names.length
+          ? 'Assigned. Calendar invites sent to ' + names.join(', ') + '.'
+          : 'Unassigned and calendar cleared.', 'good');
+        await loadAll(); render(); openRecord(key, recordId);
+      } catch(e){
+        toast(e.message,'bad');
+        ab.disabled=false; ab.textContent='Assign and lock calendar';
+      }
+    };
+    acts.appendChild(ab);
+
+    if(key === 'troubleshooting'){
+      const eb = el('button','btn','Escalate to remedial works');
+      eb.onclick = ()=>{
+        const scope = prompt('Scope of remedial works', clean(r.Issue) || '');
+        if(scope === null) return;
+        act(eb,'escalate',{recordId:recordId, scope:scope},
+          'Remedial works record raised');
+      };
+      acts.appendChild(eb);
+    }
+    b.appendChild(acts);
+
+    b.appendChild(el('div','divider'));
+    b.appendChild(el('div','section-title','Edit details'));
+    const editable = cat.headers.filter(h =>
+      ['Client','Client Contact','Location','Issue','Scope of Works','Purpose','Ticket']
+        .indexOf(h) !== -1);
+    const inputs = {};
+    editable.forEach(h => {
+      const node = /Issue|Scope of Works/.test(h)
+        ? (()=>{ const t2=el('textarea'); t2.value=clean(r[h]); return t2; })()
+        : input('text', r[h]);
+      inputs[h] = node;
+      b.appendChild(field(h, node));
+    });
+    const sb2 = el('button','btn btn-sm','Save details');
+    sb2.onclick = ()=>{
+      const fields = {};
+      Object.keys(inputs).forEach(h => fields[h] = inputs[h].value);
+      act(sb2,'updateRecord',{category:key, recordId:recordId, fields:fields}, 'Details saved');
+    };
+    b.appendChild(sb2);
+  }
+}
+
+function splitNames(v){
+  return String(v==null?'':v).split(',').map(s=>s.trim()).filter(Boolean);
+}
+
+/** Fire an action, then refresh the list and reopen the panel. */
+async function act(btn, action, payload, okMsg){
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Working\u2026';
+  try {
+    await api(action, payload);
+    toast(okMsg || 'Saved', 'good');
+    await loadAll();
+    render();
+    if(payload.recordId){
+      const key = payload.category ||
+        (action==='escalate' ? 'troubleshooting' : S.page);
+      openRecord(key, payload.recordId);
+    } else {
+      closePanel();
+    }
+  } catch(e){
+    toast(e.message, 'bad');
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+
+/* ---------- create ---------- */
+function openCreate(key){
+  const cat = S.boot.categories[key];
+  showPanel('New ' + cat.label.replace(/s$/,'').toLowerCase(),
+    'Record ID is generated on save.');
+  const b = $('#panelBody'); b.innerHTML = '';
+  const admin = S.boot.user.isAdmin;
+  const inputs = {};
+
+  function add(h, node){ inputs[h] = node; b.appendChild(field(h, node)); }
+
+  const clientList = el('datalist'); clientList.id = 'clientList';
+  S.boot.clients.forEach(c => {
+    const o = el('option'); o.value = c.client; clientList.appendChild(o);
+  });
+  b.appendChild(clientList);
+
+  const cin = input('text'); cin.setAttribute('list','clientList');
+  cin.onchange = ()=>{
+    const c = S.boot.clients.find(x => x.client === cin.value);
+    if(!c) return;
+    if(inputs['Client Contact'] && !inputs['Client Contact'].value){
+      inputs['Client Contact'].value =
+        [c.contactName, c.contactNumber].filter(Boolean).join(' ');
+    }
+    if(inputs['Location'] && !inputs['Location'].value){
+      inputs['Location'].value = c.location || '';
+    }
+  };
+  add('Client', cin);
+  add('Client Contact', input('text'));
+  add('Location', input('text'));
+
+  if(key === 'troubleshooting'){ const t=el('textarea'); add('Issue', t); }
+  if(key === 'remedial'){
+    const t=el('textarea'); add('Scope of Works', t);
+    add('Ticket', input('text'));
+  }
+  if(key === 'siteVisit') add('Purpose', input('text'));
+
+  add('Priority', select(S.boot.priorities, 'Normal'));
+  add('Status', select(cat.statuses, cat.statuses[0]));
+
+  const row = el('div','row2');
+  const dIn = input('date'); const tIn = input('time'); tIn.value = '08:00';
+  inputs['Date Scheduled'] = dIn; inputs['Time Scheduled'] = tIn;
+  row.appendChild(field('Date Scheduled', dIn));
+  row.appendChild(field('Time Scheduled', tIn));
+  b.appendChild(row);
+  const dur = input('number'); dur.value='3'; dur.min='0.5'; dur.step='0.5';
+  add('Duration (hrs)', dur);
+
+  let techBox = null;
+  if(admin){
+    techBox = el('div');
+    S.boot.technicians.forEach(t => {
+      const lab = el('label','tick');
+      const cb = input('checkbox'); cb.value = t.name; cb.dataset.tech='1';
+      lab.appendChild(cb);
+      lab.appendChild(el('span','', t.name + (t.skills ? ' \u00b7 ' + t.skills : '')));
+      techBox.appendChild(lab);
+    });
+    b.appendChild(field('Assign technicians (optional)', techBox));
+  }
+
+  const save = el('button','btn btn-primary','Create record');
+  save.onclick = async ()=>{
+    if(!inputs['Client'].value.trim()){ toast('Client is required.','bad'); return; }
+    const fields = {};
+    Object.keys(inputs).forEach(h => {
+      const v = inputs[h].value;
+      if(v !== '' && v != null) fields[h] = v;
+    });
+    if(techBox){
+      const names = Array.from(techBox.querySelectorAll('[data-tech]'))
+        .filter(c=>c.checked).map(c=>c.value);
+      if(names.length) fields['Technicians Assigned'] = names.join(', ');
+    }
+    save.disabled = true; save.textContent = 'Creating\u2026';
+    try {
+      const res = await api('createRecord',{category:key, fields:fields});
+      toast('Raised ' + res.recordId, 'good');
+      await loadAll(); render();
+      openRecord(key, res.recordId);
+    } catch(e){
+      toast(e.message,'bad');
+      save.disabled=false; save.textContent='Create record';
+    }
+  };
+  b.appendChild(save);
+}
+
+/* ---------- resource requests ---------- */
+function renderResources(v){
+  const admin = S.boot.user.isAdmin;
+  pageHead(v, admin ? 'Resource requests' : 'My resource requests',
+    admin ? 'Approve, part-approve or deny. Approving allocates stock.'
+          : 'Raised from a job. An administrator releases the stock.');
+
+  const pending = S.requests.filter(r => clean(r.Status)==='Requested');
+  const rest = S.requests.filter(r => clean(r.Status)!=='Requested');
+
+  if(pending.length){
+    v.appendChild(el('div','section-title','Awaiting a decision (' + pending.length + ')'));
+    const t = el('table');
+    t.innerHTML = '<tr><th class="mono">Request</th><th>Item</th><th class="mono">Qty</th>'
+      + '<th class="mono">Job</th><th>By</th>' + (admin?'<th>Decision</th>':'<th>Status</th>') + '</tr>';
+    pending.forEach(q => {
+      const res = S.boot.resources.find(x => x.code === clean(q['Resource Code']));
+      const tr = el('tr');
+      tr.innerHTML =
+        '<td class="mono">'+esc(clean(q['Request ID']))+'</td>'
+      + '<td>'+esc(clean(q['Resource Name']))
+        + (res ? ' <span style="color:var(--ink-3)">('+res.available+' free)</span>' : '')+'</td>'
+      + '<td class="mono">'+esc(clean(q['Qty Requested']))+'</td>'
+      + '<td class="mono">'+esc(clean(q['Record ID']))+'</td>'
+      + '<td>'+esc(clean(q['Requested By']))+'</td>';
+      const td = el('td');
+      if(admin){
+        const wrap = el('div','actions');
+        const qi = input('number'); qi.value = clean(q['Qty Requested']);
+        qi.min='0'; qi.style.width='62px';
+        const ok = el('button','btn btn-sm btn-amber','Approve');
+        ok.onclick = ()=>decide(ok, q, qi);
+        const no = el('button','btn btn-sm btn-danger','Deny');
+        no.onclick = ()=>{
+          const notes = prompt('Reason (optional)') || '';
+          send(no, {requestId:clean(q['Request ID']), decision:'Denied', notes:notes});
+        };
+        wrap.appendChild(qi); wrap.appendChild(ok); wrap.appendChild(no);
+        td.appendChild(wrap);
+      } else {
+        td.textContent = 'Requested';
+      }
+      tr.appendChild(td);
+      t.appendChild(tr);
+    });
+    v.appendChild(t);
+  } else {
+    const e = el('div','empty');
+    e.appendChild(el('b','','Nothing awaiting a decision'));
+    e.appendChild(el('div','', admin
+      ? 'Requests raised by technicians land here.'
+      : 'Open a job and use the Resources section to request an item.'));
+    v.appendChild(e);
+  }
+
+  function decide(btn, q, qi){
+    const asked = Number(clean(q['Qty Requested']));
+    const given = Number(qi.value);
+    const decision = given >= asked ? 'Approved' : 'Partially Approved';
+    send(btn, {requestId:clean(q['Request ID']), decision:decision, qtyApproved:given});
+  }
+  async function send(btn, payload){
+    btn.disabled = true; btn.textContent='\u2026';
+    try {
+      const d = await api('decideResourceRequest', payload);
+      toast(d.decision + ', ' + d.qtyApproved + ' allocated', 'good');
+      await loadAll(); render();
+    } catch(e){ toast(e.message,'bad'); btn.disabled=false; btn.textContent='Retry'; }
+  }
+
+  if(rest.length){
+    v.appendChild(el('div','section-title','Decided (' + rest.length + ')'));
+    const t2 = el('table');
+    t2.innerHTML = '<tr><th class="mono">Request</th><th>Item</th><th class="mono">Approved</th>'
+      + '<th class="mono">Job</th><th>Status</th><th>By</th></tr>';
+    rest.slice().reverse().forEach(q => {
+      const tr = el('tr');
+      tr.innerHTML =
+        '<td class="mono">'+esc(clean(q['Request ID']))+'</td>'
+      + '<td>'+esc(clean(q['Resource Name']))+'</td>'
+      + '<td class="mono">'+esc(clean(q['Qty Approved']))+'</td>'
+      + '<td class="mono">'+esc(clean(q['Record ID']))+'</td>'
+      + '<td>'+esc(clean(q.Status))+'</td>'
+      + '<td>'+esc(clean(q['Decided By']))+'</td>';
+      t2.appendChild(tr);
+    });
+    v.appendChild(t2);
+  }
+
+  v.appendChild(el('div','section-title','Catalogue'));
+  const t3 = el('table');
+  t3.innerHTML = '<tr><th class="mono">Code</th><th>Item</th><th>Category</th>'
+    + '<th class="mono">Free</th><th>Availability</th></tr>';
+  S.boot.resources.forEach(x => {
+    const pct = x.stock ? Math.round(x.available / x.stock * 100) : 0;
+    const cls = x.available === 0 ? 'out' : (pct < 34 ? 'tight' : '');
+    const tr = el('tr');
+    tr.innerHTML = '<td class="mono">'+esc(x.code)+'</td><td>'+esc(x.name)+'</td>'
+      + '<td>'+esc(x.category||'')+'</td>'
+      + '<td class="mono">'+x.available+' / '+x.stock+' '+esc(x.unit||'')+'</td>'
+      + '<td><div class="stock-bar"><i class="'+cls+'" style="width:'+pct+'%"></i></div></td>';
+    t3.appendChild(tr);
+  });
+  v.appendChild(t3);
+}
+
+/* ---------- technicians ---------- */
+function renderTeam(v){
+  const addBtn = el('button','btn btn-primary','Add technician');
+  addBtn.onclick = ()=>openTech(null);
+  pageHead(v, 'Technicians',
+    'Email is what signs them in and what receives the calendar invite.', [addBtn]);
+
+  const t = el('table');
+  t.innerHTML = '<tr><th class="mono">No.</th><th>Name</th><th>Email</th><th>Role</th>'
+    + '<th>Skills</th><th class="mono">Live jobs</th><th></th></tr>';
+  S.boot.technicians.forEach(x => {
+    const live = allRecords().filter(y =>
+      isActive(y.k, y.r) &&
+      splitNames(y.r['Technicians Assigned']).indexOf(x.name) !== -1).length;
+    const tr = el('tr');
+    tr.innerHTML = '<td class="mono">'+esc(x.number||'')+'</td>'
+      + '<td><b>'+esc(x.name)+'</b></td><td>'+esc(x.email||'')+'</td>'
+      + '<td>'+esc(x.role||'')+'</td><td>'+esc(x.skills||'')+'</td>'
+      + '<td class="mono">'+live+'</td>';
+    const td = el('td');
+    const e2 = el('button','btn btn-sm','Edit');
+    e2.onclick = ()=>openTech(x);
+    td.appendChild(e2); tr.appendChild(td);
+    t.appendChild(tr);
+  });
+  v.appendChild(t);
+}
+
+function openTech(x){
+  showPanel(x ? x.name : 'Add technician', 'Technicians sheet');
+  const b = $('#panelBody'); b.innerHTML = '';
+  const name = input('text', x ? x.name : '');
+  const email = input('email', x ? x.email : '');
+  const phone = input('tel', x ? x.phone : '');
+  const role = select(['Technician','Supervisor','Admin'], x ? x.role : 'Technician');
+  const active = select(['Yes','No'], 'Yes');
+  const skills = input('text', x ? x.skills : '');
+  b.appendChild(field('Name', name, true));
+  b.appendChild(field('Email', email, true));
+  b.appendChild(field('Phone', phone));
+  b.appendChild(field('Role', role));
+  b.appendChild(field('Active', active));
+  b.appendChild(field('Skills', skills));
+  b.appendChild(el('div','sub',
+    'Name must match what appears in the Technicians Assigned column, '
+    + 'since assignments are matched on name.'));
+  const save = el('button','btn btn-primary','Save technician');
+  save.style.marginTop = '14px';
+  save.onclick = ()=>{
+    if(!name.value.trim() || !email.value.trim()){
+      toast('Name and email are both required.','bad'); return;
+    }
+    act(save,'saveTechnician',{technician:{
+      Name:name.value.trim(), Email:email.value.trim().toLowerCase(),
+      Phone:phone.value, Role:role.value, Active:active.value, Skills:skills.value
+    }}, 'Technician saved');
+  };
+  b.appendChild(save);
+}
+
+/* ---------- wiring ---------- */
+$('#btnOut').onclick = ()=>signOut();
+$('#btnRefresh').onclick = async ()=>{
+  const b = $('#btnRefresh');
+  b.disabled = true; b.textContent = 'Loading\u2026';
+  try { await loadAll(); render(); toast('Up to date','good'); }
+  catch(e){ toast(e.message,'bad'); }
+  b.disabled = false; b.textContent = 'Refresh';
+};
+
+initGsi();
+</script>
+</body>
+</html>
