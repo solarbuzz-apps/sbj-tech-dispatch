@@ -487,7 +487,6 @@ window.onGsiCredential = async function(resp){
    window.onGsiCredential = async function(resp){
   console.log('GSI credential received, length', resp.credential.length);
   S.token = resp.credential;
-  S.token = resp.credential;
   const claims = decodeJwt(resp.credential);
   S.tokenExp = (claims.exp||0) * 1000;
   scheduleReauth();
@@ -513,7 +512,7 @@ function initGsi(){
       'Set CONFIG.API_URL and CONFIG.CLIENT_ID at the top of the page script, then reload.';
     return;
   }
- google.accounts.id.initialize({
+  google.accounts.id.initialize({
     client_id: CONFIG.CLIENT_ID,
     callback: window.onGsiCredential,
     auto_select: true,
