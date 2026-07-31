@@ -484,6 +484,9 @@ function decodeJwt(t){
 }
 
 window.onGsiCredential = async function(resp){
+   window.onGsiCredential = async function(resp){
+  console.log('GSI credential received, length', resp.credential.length);
+  S.token = resp.credential;
   S.token = resp.credential;
   const claims = decodeJwt(resp.credential);
   S.tokenExp = (claims.exp||0) * 1000;
@@ -510,11 +513,17 @@ function initGsi(){
       'Set CONFIG.API_URL and CONFIG.CLIENT_ID at the top of the page script, then reload.';
     return;
   }
-  google.accounts.id.initialize({
+ google.accounts.id.initialize({
     client_id: CONFIG.CLIENT_ID,
     callback: window.onGsiCredential,
     auto_select: true,
-    cancel_on_tap_outside: false
+    cancel_on_tap_outside: false,
+    use_fedcm_for_prompt: true,
+    error_callback: function (err) {
+      console.error('GSI error', err);
+      gateError('Google sign-in failed: ' + (err && err.type ? err.type : 'unknown')
+        + '. A content blocker or third-party cookie setting is the usual cause.');
+    }
   });
   google.accounts.id.renderButton($('#gsiBtn'), {
     theme:'filled_blue', size:'large', width:336, text:'signin_with'
