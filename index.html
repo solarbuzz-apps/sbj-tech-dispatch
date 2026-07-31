@@ -392,6 +392,29 @@ td.mono,th.mono{font-family:var(--mono);font-size:12px}
 <div class="toasts" id="toasts"></div>
 
 <script>
+/* Early trap, in its own block so it survives a parse failure in the main
+   script below. Without this, a syntax error leaves the sign-in card sitting
+   there with no button and no explanation. */
+window.__sbjStarted = false;
+window.addEventListener('error', function (e) {
+  var box = document.getElementById('gateErr');
+  if (!box) return;
+  box.textContent = 'Page script error: ' + (e.message || 'unknown')
+    + (e.lineno ? ' (line ' + e.lineno + ')' : '');
+  box.hidden = false;
+});
+setTimeout(function () {
+  if (window.__sbjStarted) return;
+  var box = document.getElementById('gateErr');
+  if (box && box.hidden) {
+    box.textContent = 'The page script did not run. Check the browser console '
+      + 'for a SyntaxError, and confirm the file committed to GitHub is complete.';
+    box.hidden = false;
+  }
+}, 2500);
+</script>
+
+<script>
 /* ==================================================================
    CONFIGURATION - replace these two values after deploying.
    API_URL  : the Apps Script web app /exec URL
@@ -484,7 +507,6 @@ function decodeJwt(t){
 }
 
 window.onGsiCredential = async function(resp){
-   window.onGsiCredential = async function(resp){
   console.log('GSI credential received, length', resp.credential.length);
   S.token = resp.credential;
   const claims = decodeJwt(resp.credential);
@@ -528,6 +550,16 @@ function initGsi(){
     theme:'filled_blue', size:'large', width:336, text:'signin_with'
   });
   google.accounts.id.prompt();
+
+  // If Google's iframe is blocked the button never paints, which looks like
+  // a broken page rather than a blocked one. Say so after a short grace period.
+  setTimeout(function(){
+    if(!$('#gsiBtn').children.length){
+      gateError('The Google sign-in button could not load. It is being blocked, '
+        + 'usually by an ad blocker, a privacy extension, or third-party cookies '
+        + 'being switched off. Try an incognito window with extensions disabled.');
+    }
+  }, 4000);
 }
 
 function gateError(msg){
@@ -1495,6 +1527,7 @@ $('#btnRefresh').onclick = async ()=>{
   b.disabled = false; b.textContent = 'Refresh';
 };
 
+window.__sbjStarted = true;
 initGsi();
 </script>
 </body>
